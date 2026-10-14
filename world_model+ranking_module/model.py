@@ -2,7 +2,7 @@
 
 Local Qwen interfaces, patchified CGM, Transformer transitions and trajectories,
 and a shared ranking/CGM path. Architecture and training objectives are
-documented in docs/METHOD.md.
+implemented in this module and the accompanying training scripts.
 """
 from __future__ import annotations
 
