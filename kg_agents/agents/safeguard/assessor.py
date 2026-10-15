@@ -353,10 +353,6 @@ class SafeguardAgent(BaseAgent):
             except (TypeError, ValueError):
                 return None
 
-        # DietRecommendation.total_calories represents one meal.  Daily
-        # calorie limits must only be applied when a daily total is explicitly
-        # supplied by the caller; otherwise a normal 500 kcal lunch would be
-        # incorrectly rejected as an unsafe all-day diet.
         total_calories = _as_number(plan.get("total_calories"))
         daily_calories = next(
             (
@@ -734,10 +730,7 @@ class SafeguardAgent(BaseAgent):
                                         recommendation=f"Remove {rule_desc} for {condition} management"
                                     ))
 
-                            # ``max_sodium`` is a numeric daily limit.  Read it
-                            # only when the caller provides an explicit sodium
-                            # value; otherwise leave the rule auditable but do
-                            # not invent nutrition data for a single meal.
+
                             if rule_key == "max_sodium":
                                 sodium = next(
                                     (
