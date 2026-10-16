@@ -74,6 +74,8 @@ conda activate xlife
 
 #### 3. Install Python Dependencies
 
+Install the Python dependencies for the world model, ranking module and agents:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -111,10 +113,9 @@ This module generates diet and exercise prescriptions from a hybrid graph and ve
 
 **1. Configure Database and Models**
 
-Install the agent dependencies and copy the configuration template:
+Copy the agent configuration template:
 
 ```bash
-pip install -r requirements-agents.txt
 cp kg_agents/config.example.json kg_agents/config.json
 ```
 
