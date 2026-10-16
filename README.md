@@ -1,64 +1,49 @@
 <p align="center">
-  <img src="./src/xlife.png" width="300" alt="X-Life System Logo">
+  <img src="./src/xlife.png" width="200" alt="X-Life System Logo">
 </p>
 
 <h1 align="center">X-Life</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch 2.7](https://img.shields.io/badge/PyTorch-2.7-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![Unity 2022.3](https://img.shields.io/badge/Unity-2022.3.x-000000?logo=unity&logoColor=white)](https://unity.com/)
-[![Citation](https://img.shields.io/badge/Citation-CITATION.cff-lightgrey)](./CITATION.cff)
-
 <p align="center">
-  <strong>X-Life</strong> is a metabolic world-model system for adaptive lifestyle medicine that translates continuous physiological data and sensing into personalised, quantitative dietary and postprandial activity prescriptions, concurrently meeting individual lifestyle preferences, contextual settings and safety constraints.
-  
-## 📋 Table of Contents
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10-3776AB?logo=python&amp;logoColor=white" alt="Python 3.10"></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-2.7-EE4C2C?logo=pytorch&amp;logoColor=white" alt="PyTorch 2.7"></a>
+  <a href="https://unity.com/"><img src="https://img.shields.io/badge/Unity-2022.3.x-000000?logo=unity&amp;logoColor=white" alt="Unity 2022.3"></a>
+  <a href="./CITATION.cff"><img src="https://img.shields.io/badge/Citation-CITATION.cff-lightgrey" alt="Citation"></a>
+</p>
 
-- [📋 Table of Contents](#-table-of-contents)
-- [🌟 Overview](#-overview)
-- [🚀 Quick Start](#-quick-start)
-  - [System Requirements](#system-requirements)
-    - [Software Dependencies](#software-dependencies)
-    - [Hardware Requirements](#hardware-requirements)
-  - [Installation](#installation)
-    - [1. Clone the Repository](#1-clone-the-repository)
-    - [2. Create Python Environment](#2-create-python-environment)
-    - [3. Install Python Dependencies](#3-install-python-dependencies)
-    - [4. Install Neo4j Service](#4-install-neo4j-service)
-- [🏗️ Core Modules](#️-core-modules)
-  - [1. 🕸️ Lifestyle Prescription Generation Module](#1-️-lifestyle-prescription-generation-module)
-    - [Configuration Steps](#configuration-steps)
-    - [Run Pipelines](#run-pipelines)
-  - [2. 🧠 Diet/Exercise Sub-world model and Ranking Module](#2--dietexercise-sub-world-model-and-ranking-module)
-  - [3. 🛡️ Safety Module](#3-️-safety-module)
-  - [4. 🧬 Multi-omics Model](#4--multi-omics-model)
-  - [5. 🥽 AR Deployment](#5--ar-deployment)
-    - [Hardware / Platform](#hardware--platform)
-    - [Software Environment](#software-environment)
-    - [Dependencies](#dependencies)
-      - [A. Vuplex 3D WebView (Required, Not Included)](#a-vuplex-3d-webview-required-not-included)
-      - [B. XREAL XR Plugin (Required, Provided in the External Unity Archive)](#b-xreal-xr-plugin-required-provided-in-the-external-unity-archive)
-      - [C. Unity Package Manager Dependencies (Auto-installed)](#c-unity-package-manager-dependencies-auto-installed)
-    - [Project Setup](#project-setup)
-      - [1 Configure the WebView Initial URL](#1-configure-the-webview-initial-url)
-      - [2 (Optional) Configure iFLYTEK Speech Recognition](#2-optional-configure-iflytek-speech-recognition)
-    - [Build APK](#build-apk)
-      - [Pre-build Checklist](#pre-build-checklist)
-      - [Build Steps in Unity (Android)](#build-steps-in-unity-android)
-- [📊 Minimal Dataset](#-minimal-dataset)
-- [📄 License](#-license)
+**X-Life** is a metabolic world-model system for adaptive lifestyle medicine that translates continuous physiological data and sensing into personalised, quantitative dietary and postprandial activity prescriptions, concurrently meeting individual lifestyle preferences, contextual settings and safety constraints.
 
-## 🌟 Overview
+<a name="table-of-contents"></a>
+
+## 📑 Table of Contents
+
+- [🔎 Overview](#overview)
+- [🚀 Quick Start](#quick-start)
+- [🧩 Core Modules](#core-modules)
+  - [Lifestyle Prescription Generation Module](#lifestyle-prescription-generation-module)
+  - [Diet/Exercise Sub-world model and Ranking Module](#dietexercise-sub-world-model-and-ranking-module)
+  - [Safety Module](#safety-module)
+  - [Multi-omics Model](#multi-omics-model)
+- [🥽 AR Deployment](#ar-deployment)
+- [📊 Minimal Dataset](#minimal-dataset)
+- [📄 License](#license)
+
+<a name="overview"></a>
+
+## 🔎 Overview
 
 This repository contains the Python code and minimal dataset for **"A metabolic world model system for personalised lifestyle medicine"**. The Unity AR client is distributed separately as `XLIFE-AR.zip`.
 
+
+<a name="quick-start"></a>
 
 ## 🚀 Quick Start
 
 ### System Requirements
 
 #### Software Dependencies
+
 - **Python**: 3.10+
 - **PyTorch**: 2.7.0
 - **JDK**: 17.0.18+
@@ -66,18 +51,21 @@ This repository contains the Python code and minimal dataset for **"A metabolic 
 - **Neo4j**: 5.26.21+
 
 #### Hardware Requirements
+
 - **Training**: NVIDIA A800 or equivalent GPU
 - **AR Deployment**: Android 14+ compatible device
 
 ### Installation
 
 #### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/2025XLife/X-Life.git
 cd X-Life
 ```
 
 #### 2. Create Python Environment
+
 ```bash
 # Using conda (recommended)
 conda create -n xlife python=3.10 -y
@@ -85,11 +73,16 @@ conda activate xlife
 ```
 
 #### 3. Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 #### 4. Install Neo4j Service
+
+<details>
+<summary>🔧 JDK and Neo4j setup commands</summary>
+
 ```bash
 # Install JDK
 sudo apt install openjdk-17-jdk
@@ -104,16 +97,20 @@ cd neo4j-community-5.26.21/bin/
 ./neo4j start
 ```
 
-## 🏗️ Core Modules
+</details>
 
+<a name="core-modules"></a>
 
-### 1. 🕸️ Lifestyle Prescription Generation Module
+## 🧩 Core Modules
+
+### Lifestyle Prescription Generation Module
 
 This module generates diet and exercise prescriptions from a hybrid graph and vector knowledge base.
 
 #### Configuration Steps
 
 **1. Configure Database and Models**
+
 Install the agent dependencies and copy the configuration template:
 
 ```bash
@@ -122,6 +119,9 @@ cp kg_agents/config.example.json kg_agents/config.json
 ```
 
 Configure the Neo4j database, local DeepSeek-R1 service and model paths in `./kg_agents/config.json`:
+
+<details>
+<summary>⚙️ Example agent configuration</summary>
 
 ```json
 {
@@ -145,8 +145,12 @@ Configure the Neo4j database, local DeepSeek-R1 service and model paths in `./kg
 }
 ```
 
+</details>
+
 **2. Prepare Guidelines**
+
 Prepare guidelines following the descriptions in our paper:
+
 ```
 kg_agents/
 └── data/
@@ -159,7 +163,9 @@ kg_agents/
 ```
 
 **3. Extract and Embed Entities**
+
 Make sure the Neo4j server has started:
+
 ```bash
 cd kg_agents
 # Extract knowledge from ./data
@@ -173,6 +179,7 @@ python -m core.embed_kg
 #### Run Pipelines
 
 **Generation and Assessment Pipelines**
+
 ```bash
 # Run these commands from the repository root.
 cd kg_agents
@@ -191,7 +198,9 @@ cd kg_agents
 python server.py
 ```
 
-**API Requests**
+<details>
+<summary>🔌 API request examples</summary>
+
 ```bash
 # Diet prescription generation
 curl -X POST http://localhost:5000/api/v1/diet/generate-only \
@@ -213,9 +222,11 @@ curl -X POST http://localhost:5000/api/v1/safety/evaluate \
   }'
 ```
 
+</details>
+
 Prompt examples for generation, assessment and knowledge-graph extraction are in [kg_agents/sample_prompts.md](./kg_agents/sample_prompts.md).
 
-### 2. 🧠 Diet/Exercise Sub-world model and Ranking Module
+### Diet/Exercise Sub-world model and Ranking Module
 
 Diet/Exercise sub-world models simulate future glucose state and Ranking module ranks candidate diet and exercise prescriptions.
 
@@ -268,64 +279,71 @@ For physiological and user alignment, select the corresponding `--stage`, set `-
 
 Run `python 'world_model+ranking_module/train.py' --help` for available options.
 
-### 3. 🛡️ Safety Module
+### Safety Module
 
 The safety module uses retrieval-augmented generation and explicit safety constraints. Configure the local DeepSeek-R1 service in `kg_agents/config.json`. Prompts are in [kg_agents/sample_prompts.md](./kg_agents/sample_prompts.md).
 
-### 4. 🧬 Multi-omics Model
+### Multi-omics Model
 
-Structured omics annotations provide auxiliary targets during world-model training. The omics prediction head is removed at inference. 
+Structured omics annotations provide auxiliary targets during world-model training. The omics prediction head is removed at inference.
 
-### 5. 🥽 AR Deployment
+<a name="ar-deployment"></a>
+
+## 🥽 AR Deployment
 
 The external Unity project targets **XREAL AR** devices. It embeds the web UI with **Vuplex 3D WebView**, captures images and video with the **XREAL RGB Camera**, and sends the results back to the web page through `postMessage`.
 
-#### Hardware / Platform
+**Download:** [XLIFE-AR.zip](https://drive.google.com/file/d/1Ul-z-lDQSRvFw9aqk6uxIVhMamKpvAJM/view?usp=sharing) (complete Unity project).
+
+### Hardware / Platform
 
 - Target platform: Android
 - Device: XREAL devices / runtimes that support XREAL XR Plugin (and any Android device that can install an APK)
 - Debugging: USB cable + USB debugging enabled (required for Build & Run)
 
 
-#### Software Environment
+### Software Environment
 
 - **Unity**: `2022.3.x` (this project uses `2022.3.61t8` in `ProjectSettings/ProjectVersion.txt`)
 - **Unity Hub modules**: Android Build Support (SDK / NDK / OpenJDK)
 - **Optional**: `adb` (usually not needed if you use Unity's Build & Run; needed for CLI install/debugging)
-- **Download**: Download the complete Unity project [XLIFE-AR.zip](https://drive.google.com/file/d/1Ul-z-lDQSRvFw9aqk6uxIVhMamKpvAJM/view?usp=sharing)
-
-#### Dependencies
 
 The Python and Neo4j modules are separate from the Unity client. The external `XLIFE-AR.zip` archive contains the Unity project; `Assets/`, `Packages/` and `ProjectSettings/` are not included here.
 
 > Vuplex must be purchased and imported separately. The XREAL XR Plugin is included in the external archive.
 
-##### A. Vuplex 3D WebView
+<details>
+<summary>📦 Dependencies and plugin installation</summary>
+
+### Vuplex 3D WebView
 
 - Purchase and import (Unity Asset Store): [Vuplex 3D WebView for Android (with Gecko Engine)](https://assetstore.unity.com/packages/tools/network/vuplex-3d-webview-for-android-with-gecko-engine-245867)
 - After importing, you should see: `Assets/Vuplex/WebView/...`, and be able to use `CanvasWebViewPrefab` in scenes
 - Note: if you want to run WebView directly in the macOS/Windows Editor, you may need to install the native plugins for those platforms per Vuplex docs; building for Android only is fine
 
-##### B. XREAL XR Plugin
+### XREAL XR Plugin
 
 - Included in the external `XLIFE-AR.zip` archive: `Packages/com.xreal.xr.tar.gz`
 - The external Unity project's `Packages/manifest.json` references the local package: `"com.xreal.xr": "@com.xreal.xr.tar.gz"`
 - To upgrade the plugin: replace `Packages/com.xreal.xr.tar.gz` and keep the `manifest.json` reference consistent
 
-##### C. Unity Package Manager Dependencies
+### Unity Package Manager Dependencies
 
 After opening the project, Unity resolves the dependencies in `Packages/manifest.json` automatically.
 
-#### Project Setup
+</details>
 
-##### 1. Configure the WebView Initial URL
+<details>
+<summary>🛠️ Project setup</summary>
+
+### 1. Configure the WebView Initial URL
 
 1. Open the scene: `Assets/Scenes/WebView.unity`
 2. Select `CanvasWebViewPrefab` in the scene hierarchy
 3. Set `InitialUrl` to your web URL
    - Current example value: `https://xlife.chat/MainPage/AR`
 
-##### 2. (Optional) Configure iFLYTEK Speech Recognition
+### 2. (Optional) Configure iFLYTEK Speech Recognition
 
 Required for speech recognition.
 
@@ -344,9 +362,12 @@ Alternatively, create a ScriptableObject config in Unity:
 - Set the credentials in the Inspector
 - Place the config asset in `Assets/Resources/` folder
 
-#### Build APK
+</details>
 
-##### Pre-build Checklist
+<details>
+<summary>📱 Build and export an Android APK</summary>
+
+### Pre-build Checklist
 
 - Vuplex is imported correctly (otherwise you will see compilation errors like missing `Vuplex.WebView` namespace)
 - `Packages/com.xreal.xr.tar.gz` exists and Unity Package Manager shows no errors
@@ -354,7 +375,7 @@ Alternatively, create a ScriptableObject config in Unity:
   - `Assets/Scenes/WebView.unity`
   - `Assets/Scenes/RGBCameraAndCapture.unity`
 
-##### Build Steps in Unity (Android)
+### Build Steps in Unity (Android)
 
 1. `File -> Build Settings...`
 2. Select `Android`, then click `Switch Platform`
@@ -369,6 +390,10 @@ Alternatively, create a ScriptableObject config in Unity:
 
 > Note: this project includes a custom manifest at `Assets/Plugins/Android/AndroidManifest.xml`, which declares network/microphone/screen-capture related permissions, including the Android 14+ foreground service permission `FOREGROUND_SERVICE_MEDIA_PROJECTION`.
 
+</details>
+
+<a name="minimal-dataset"></a>
+
 ## 📊 Minimal Dataset
 
 The minimal dataset is available at [`./minimal_dataset/`](./minimal_dataset/). It contains three pseudonymous participants with:
@@ -377,6 +402,8 @@ The minimal dataset is available at [`./minimal_dataset/`](./minimal_dataset/). 
 - 2 exercise events with pre/post-event CGM trajectories;
 - 2 nocturnal windows with rule-derived hypoglycemia labels;
 - `manifest.json` with event counts and image hashes.
+
+<a name="license"></a>
 
 ## 📄 License
 
