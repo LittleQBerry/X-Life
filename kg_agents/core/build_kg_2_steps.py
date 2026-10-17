@@ -314,7 +314,6 @@ def extract_quads_with_llm(text_chunk, cot_prompt=None, resolution_prompt=None, 
     if len(text_chunk.strip()) < 10:
         return []
 
-    # Fallback to one-step if two-step not enabled or prompts not available
     if not use_two_step or not cot_prompt:
         return []
 
