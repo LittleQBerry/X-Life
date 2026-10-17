@@ -125,11 +125,13 @@ class ImageEncoder(nn.Module):
             raise ValueError("Supply one dietary description for each sample.")
         prompts, pil_images = [], []
         for value, text in zip(images, texts):
-            image = self._pil_image(value)
             content = []
-            if image is not None:
-                content.append({"type": "image"})
-                pil_images.append(image)
+            values = value if isinstance(value, (list, tuple)) else [value]
+            for value in values:
+                image = self._pil_image(value)
+                if image is not None:
+                    content.append({"type": "image"})
+                    pil_images.append(image)
             content.append({"type": "text", "text": str(text) or "No dietary information"})
             prompts.append(self.processor.apply_chat_template(
                 [{"role": "user", "content": content}], tokenize=False, add_generation_prompt=False

@@ -218,7 +218,7 @@ class SampleImagePredictionDataset(Dataset):
         if not meal_info:
             return "No meal data"
 
-        fields = ('meal_type', 'time', 'description', 'ingredients', 'preparation', 'preparation_method',
+        fields = ('meal_type', 'time', 'food_names', 'description', 'ingredients', 'preparation', 'preparation_method',
                   'nutrition', 'nutrients', 'carbohydrate_g', 'protein_g', 'fat_g', 'fiber_g')
         content = {key: meal_info[key] for key in fields if meal_info.get(key) is not None}
         items = [{key: value for key, value in item.items() if key not in {'image_name', 'image_path'}}
@@ -549,14 +549,7 @@ class CGMPredictionTrainerWithImage:
         cgm_postprandial_mask = torch.stack([item['cgm_postprandial_mask'] for item in batch])
 
 
-        food_images = []
-        for item in batch:
-
-            if item['food_images']:
-                food_images.append(item['food_images'][0])
-            else:
-
-                food_images.append(None)
+        food_images = [item['food_images'] or None for item in batch]
 
 
         subject_ids = [item['subject_id'] for item in batch]

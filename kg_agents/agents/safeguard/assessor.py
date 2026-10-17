@@ -100,36 +100,41 @@ class SafeguardAgent(BaseAgent):
             plan, plan_type, user_metadata, environment
         )
 
-        # Keep track of whether semantic review actually completed.  An empty
-        # finding set is different from a failed/absent review: in the latter
-        # case we must fail closed unless deterministic rules already provided
-        # an independent decision.
+        # Semantic review is required in addition to deterministic checks.
         llm_review_completed = (
             isinstance(llm_assessment, dict)
-            and (
-                "risk_factors" in llm_assessment
-                or "checks" in llm_assessment
-            )
+            and isinstance(llm_assessment.get("risk_factors"), list)
+            and isinstance(llm_assessment.get("checks"), list)
+            and bool(llm_assessment["checks"])
         )
 
         # Merge LLM findings BEFORE scoring
-        if isinstance(llm_assessment, dict):
+        if llm_review_completed:
             for rf_dict in (llm_assessment.get("risk_factors") or []):
                 if isinstance(rf_dict, dict):
                     try:
                         payload = dict(rf_dict)
+                        if not all(isinstance(payload.get(key), str) and payload[key].strip()
+                                   for key in ("factor", "category", "description", "recommendation")):
+                            raise ValueError("Risk-factor text fields must be nonempty.")
                         payload["severity"] = self._normalize_risk_level(
                             payload.get("severity"), default=RiskLevel.HIGH
                         )
                         risk_factors.append(RiskFactor(**payload))
                     except Exception:
+                        llm_review_completed = False
                         checks.append(self._llm_schema_failure("risk_factor"))
                 else:
+                    llm_review_completed = False
                     checks.append(self._llm_schema_failure("risk_factor"))
             for check_dict in (llm_assessment.get("checks") or []):
                 if isinstance(check_dict, dict):
                     try:
                         payload = dict(check_dict)
+                        if not isinstance(payload.get("passed"), bool) or not all(
+                                isinstance(payload.get(key), str) and payload[key].strip()
+                                for key in ("check_name", "message")):
+                            raise ValueError("Safety checks require a boolean verdict and nonempty text.")
                         if not payload.get("passed", False) and payload.get("severity") is None:
                             payload["severity"] = RiskLevel.HIGH
                         elif payload.get("severity") is not None:
@@ -138,13 +143,22 @@ class SafeguardAgent(BaseAgent):
                             )
                         checks.append(SafetyCheck(**payload))
                     except Exception:
+                        llm_review_completed = False
                         checks.append(self._llm_schema_failure("check"))
                 else:
+                    llm_review_completed = False
                     checks.append(self._llm_schema_failure("check"))
         elif llm_assessment is not None:
             # A non-null response with no schema is a failed semantic review,
             # and should not be treated as an empty safe result.
             checks.append(self._llm_schema_failure("assessment"))
+
+        if not llm_review_completed:
+            return self._assessment_unavailable(
+                risk_factors=risk_factors,
+                checks=checks,
+                message="Semantic safety review incomplete; manual review required"
+            )
 
         if SAFETY_MEASURE == 1:
             # Calculate score based on ALL checks (Rules + LLM)
@@ -152,14 +166,6 @@ class SafeguardAgent(BaseAgent):
             total_checks = len(checks) if checks else 1  # Avoid div by zero
 
             # Base score
-            if not checks and not risk_factors and not llm_review_completed:
-                # No rule or semantic review completed.  Never turn an
-                # unavailable safety review into a safe 100-point result.
-                return self._assessment_unavailable(
-                    risk_factors=risk_factors,
-                    checks=checks,
-                    message="Safety assessment unavailable; manual review required"
-                )
             if not checks:
                 base_score = 100
             else:
@@ -217,13 +223,6 @@ class SafeguardAgent(BaseAgent):
             )
         elif SAFETY_MEASURE == 2:
             # print(f"Evaluate LLM Assessment by risk factors...")
-            if not llm_review_completed and not checks and not risk_factors:
-                return self._assessment_unavailable(
-                    risk_factors=risk_factors,
-                    checks=checks,
-                    message="Safety assessment unavailable; manual review required"
-                )
-
             passed = True
             for rf in risk_factors:
                 if rf.severity in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]:
@@ -263,13 +262,6 @@ class SafeguardAgent(BaseAgent):
 
         elif SAFETY_MEASURE == 3:
             print(f"Evaluate LLM Assessment by checks...")
-            if not llm_review_completed and not checks and not risk_factors:
-                return self._assessment_unavailable(
-                    risk_factors=risk_factors,
-                    checks=checks,
-                    message="Safety assessment unavailable; manual review required"
-                )
-
             passed = True
             for c in checks:
                 if not c.passed:
@@ -327,7 +319,7 @@ class SafeguardAgent(BaseAgent):
         checks: List[SafetyCheck],
         message: str
     ) -> SafetyAssessment:
-        """Return a fail-closed result when no safety review completed."""
+        """Return a fail-closed result when semantic review did not complete."""
         return SafetyAssessment(
             score=0,
             is_safe=False,
