@@ -208,7 +208,7 @@ class SampleImageDataset(Dataset):
         # Food details
         if isinstance(food_data, dict):
             food_info = food_data.get('data', food_data)
-            for key in ('description', 'ingredients', 'preparation', 'preparation_method',
+            for key in ('food_names', 'description', 'ingredients', 'preparation', 'preparation_method',
                         'nutrition', 'nutrients', 'carbohydrate_g', 'protein_g', 'fat_g', 'fiber_g'):
                 if key in food_info:
                     info[key] = food_info[key]
@@ -234,7 +234,7 @@ class SampleImageDataset(Dataset):
                     image_paths.append(img_path)
                 
                 foods.append({
-                    **{key: item[key] for key in ('food', 'food_name', 'name', 'portion',
+                    **{key: item[key] for key in ('food', 'food_name', 'food_names', 'name', 'portion',
                          'portion_number', 'portion_unit', 'weight', 'weight_g', 'nutrition',
                          'nutrients', 'ingredients', 'preparation') if key in item},
                     'image_name': img_name,

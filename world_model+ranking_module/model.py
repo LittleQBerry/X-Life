@@ -2,7 +2,7 @@
 
 Local Qwen interfaces, patchified CGM, Transformer transitions and trajectories,
 and a shared ranking/CGM path. Architecture and training objectives are
-documented in docs/METHOD.md.
+implemented in this module and the accompanying training scripts.
 """
 from __future__ import annotations
 
@@ -125,11 +125,13 @@ class ImageEncoder(nn.Module):
             raise ValueError("Supply one dietary description for each sample.")
         prompts, pil_images = [], []
         for value, text in zip(images, texts):
-            image = self._pil_image(value)
             content = []
-            if image is not None:
-                content.append({"type": "image"})
-                pil_images.append(image)
+            values = value if isinstance(value, (list, tuple)) else [value]
+            for value in values:
+                image = self._pil_image(value)
+                if image is not None:
+                    content.append({"type": "image"})
+                    pil_images.append(image)
             content.append({"type": "text", "text": str(text) or "No dietary information"})
             prompts.append(self.processor.apply_chat_template(
                 [{"role": "user", "content": content}], tokenize=False, add_generation_prompt=False
@@ -262,7 +264,7 @@ class CGMTransformerDecoder(nn.Module):
 
 
 class ActionTransitionModule(nn.Module):
-    """Two-token Transformer transition, recurrent dynamics, temporal trajectory."""
+    """Action-conditioned representation with parallel dynamics and trajectory branches."""
     def __init__(self, state_dim, action_dim=None, dropout=0.1, nhead=4,
                  transition_layers=2, trajectory_layers=2):
         super().__init__()
@@ -272,50 +274,69 @@ class ActionTransitionModule(nn.Module):
         self.trajectory_branch = transformer_encoder(state_dim, nhead, trajectory_layers, dropout)
         self.trajectory_position = PositionalEncoding(state_dim)
 
-    def _dynamic_step(self, state, action):
+    def _initial_state(self, state, action):
         action = self.action_projection(action)
         tokens = torch.stack([state, action], dim=1)
-        intermediate = self.transition(tokens)[:, 0]
-        return self.dynamics_branch(intermediate, state)
+        return self.transition(tokens)[:, 0]
 
     def _trajectory(self, states):
         tokens = self.trajectory_position(states.transpose(0, 1)).transpose(0, 1)
         return self.trajectory_branch(tokens, mask=causal_mask(tokens.size(1), tokens.device))
 
     def forward(self, physiological_state, action_state):
-        dynamic = self._dynamic_step(physiological_state, action_state)
-        trajectory = self._trajectory(dynamic.unsqueeze(1))[:, 0]
-        return dynamic, trajectory
+        dynamics, trajectory = self.rollout(physiological_state, action_state)
+        return dynamics[:, 0], trajectory[:, 0]
 
     def rollout(self, physiological_state, action_state, horizon=1):
         horizon = int(horizon)
         if horizon < 1:
             raise ValueError("horizon must be positive.")
-        if action_state.ndim == 2:
-            action_state = action_state.unsqueeze(1).expand(-1, horizon, -1)
-        if action_state.ndim != 3 or action_state.size(1) != horizon:
-            raise ValueError("Action sequences must have shape [batch, horizon, action].")
-        state, states = physiological_state, []
-        for step in range(horizon):
-            state = self._dynamic_step(state, action_state[:, step])
+        if action_state.ndim == 3:
+            if action_state.size(1) != horizon or not torch.equal(
+                    action_state, action_state[:, :1].expand_as(action_state)):
+                raise ValueError("Each rollout requires one fixed action across the prediction horizon.")
+            action_state = action_state[:, 0]
+        if action_state.ndim != 2:
+            raise ValueError("Action states must have shape [batch, action].")
+        state = self._initial_state(physiological_state, action_state)
+        states, dynamics = [], []
+        for _ in range(horizon):
             states.append(state)
-        dynamics = torch.stack(states, dim=1)
-        return dynamics, self._trajectory(dynamics)
+            state = self.dynamics_branch(state, state)
+            dynamics.append(state)
+        return torch.stack(dynamics, dim=1), self._trajectory(torch.stack(states, dim=1))
+
+
+class CrossAttentionBlock(nn.Module):
+    def __init__(self, state_dim, nhead=4, dropout=0.1):
+        super().__init__()
+        self.attention = nn.MultiheadAttention(state_dim, nhead, dropout=dropout, batch_first=True)
+        self.norm1 = nn.LayerNorm(state_dim)
+        self.feedforward = nn.Sequential(nn.Linear(state_dim, state_dim * 4), nn.GELU(),
+                                         nn.Dropout(dropout), nn.Linear(state_dim * 4, state_dim))
+        self.norm2 = nn.LayerNorm(state_dim)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+
+    def forward(self, query, memory, mask):
+        attended, _ = self.attention(query, memory, memory, attn_mask=mask, need_weights=False)
+        state = self.norm1(query + self.dropout1(attended))
+        return self.norm2(state + self.dropout2(self.feedforward(state)))
 
 
 class CrossAttentionFusion(nn.Module):
     def __init__(self, state_dim, nhead=4, dropout=0.1):
         super().__init__()
-        self.attention = nn.MultiheadAttention(state_dim, nhead, dropout=dropout, batch_first=True)
-        self.norm = nn.LayerNorm(state_dim)
+        self.blocks = nn.ModuleList(CrossAttentionBlock(state_dim, nhead, dropout) for _ in range(4))
 
     def forward(self, diet_state, exercise_state):
         sequence = diet_state.ndim == 3
         diet = diet_state if sequence else diet_state.unsqueeze(1)
         exercise = exercise_state if exercise_state.ndim == 3 else exercise_state.unsqueeze(1)
         mask = causal_mask(diet.size(1), diet.device, exercise.size(1))
-        attended, _ = self.attention(diet, exercise, exercise, attn_mask=mask, need_weights=False)
-        result = self.norm(diet + attended)
+        result = diet
+        for block in self.blocks:
+            result = block(result, exercise, mask)
         return result if sequence else result.squeeze(1)
 
 
